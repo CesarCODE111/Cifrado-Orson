@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cifrado César (desplazamiento 3)</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;max-width:900px;margin:30px auto;padding:16px}
+    h1{font-size:1.6rem}
+    textarea{width:100%;min-height:120px;padding:10px;font-size:1rem}
+    .row{display:flex;gap:8px;margin-top:8px}
+    button{padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);background:#f7f7f7;cursor:pointer}
+    button:active{transform:translateY(1px)}
+    .output{white-space:pre-wrap;background:#fafafa;padding:10px;border-radius:8px;border:1px solid #eee;min-height:80px;margin-top:8px}
+    .small{font-size:0.9rem;color:#444;margin-top:8px}
+  </style>
+</head>
+<body>
+  <h1>Cifrado César — desplazamiento fijo: 3</h1>
+  <p>Introduce el mensaje abajo y presiona <strong>Cifrar</strong> o <strong>Descifrar</strong>. El script preserva mayúsculas/minúsculas y deja sin cambios los caracteres no alfabéticos.</p>
+
+  <label for="input">Mensaje:</label>
+  <textarea id="input" placeholder="Escribe aquí...">hola a todo el chat, estoy usando el sistema de lenguaje nuevo que vamos a usar</textarea>
+
+  <div class="row">
+    <button id="btnEncrypt">Cifrar (+3)</button>
+    <button id="btnDecrypt">Descifrar (-3)</button>
+    <button id="btnCopy">Copiar resultado</button>
+    <button id="btnClear">Limpiar</button>
+  </div>
+
+  <div class="small">Resultado:</div>
+  <div id="output" class="output"></div>
+
+  <script>
+    // Función que aplica desplazamiento (puede ser positivo o negativo). Preserva case y no cambia símbolos
+    function caesarShift(text, shift) {
+      const result = [];
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch >= 'A' && ch <= 'Z') {
+          const base = 'A'.charCodeAt(0);
+          const code = ((ch.charCodeAt(0) - base + shift) % 26 + 26) % 26; // asegura positivo
+          result.push(String.fromCharCode(base + code));
+        } else if (ch >= 'a' && ch <= 'z') {
+          const base = 'a'.charCodeAt(0);
+          const code = ((ch.charCodeAt(0) - base + shift) % 26 + 26) % 26;
+          result.push(String.fromCharCode(base + code));
+        } else {
+          // deja espacios, signos, números, tildes, ñ, etc. sin cambio
+          result.push(ch);
+        }
+      }
+      return result.join('');
+    }
+
+    const input = document.getElementById('input');
+    const output = document.getElementById('output');
+    const btnEncrypt = document.getElementById('btnEncrypt');
+    const btnDecrypt = document.getElementById('btnDecrypt');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnClear = document.getElementById('btnClear');
+
+    btnEncrypt.addEventListener('click', () => {
+      output.textContent = caesarShift(input.value, 3);
+    });
+
+    btnDecrypt.addEventListener('click', () => {
+      output.textContent = caesarShift(input.value, -3);
+    });
+
+    btnCopy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(output.textContent);
+        btnCopy.textContent = 'Copiado!';
+        setTimeout(() => btnCopy.textContent = 'Copiar resultado', 1200);
+      } catch (e) {
+        alert('No se pudo copiar automáticamente. Selecciona y copia manualmente.');
+      }
+    });
+
+    btnClear.addEventListener('click', () => { input.value = ''; output.textContent = ''; });
+
+    // Inicializa con cifrado del texto por defecto (opcional)
+    output.textContent = caesarShift(input.value, 3);
+  </script>
+</body>
+</html>
